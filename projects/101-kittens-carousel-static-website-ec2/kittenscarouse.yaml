@@ -1,0 +1,74 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This CloudFormation Template was written for
+  running Kittens Carousel Static Website on EC2.
+  Kittens Carousel Static Website will be
+  deployed on Amazon Linux 2023
+  (latestamiid) EC2 Instance with
+  custom security group which allows http
+  connections on port 80 and ssh port 22 from
+  anywhere. Kittens Carousel Static Website
+  is downloaded from my Public Github repository,
+  then deployed on Apache Web Server.
+Parameters:
+  AmiId:
+    Description: choose your ami ad
+    Type: AWS::EC2::Image::Id
+    Default: ami-0b72821e2f351e396
+  KeyPair:
+    Description: choose your key pair
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: esther2
+  InstanceType:
+    Description: choose your instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+       - t2.micro
+       - t2.large
+Resources:
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: esther-sec-grp-kittens
+      GroupDescription: Enable ssh and http
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+  WebServerKittens:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      SecurityGroupIds:
+      - !Ref WebServerSecurityGroup
+      Tags:
+      - Key: Name
+        Value: !Sub Web Server of ${AWS::StackName}
+      UserData:
+        Fn::Base64: |
+
+          #! /bin/bash
+          yum update -y
+          yum install httpd -y
+          FOLDER="https://raw.githubusercontent.com/okti3535/aws-projects-de-09/main/101-kittens-carousel-static-website-ec2/static-web/"
+          cd /var/www/html
+          wget $FOLDER/index.html
+          wget $FOLDER/cat0.jpg
+          wget $FOLDER/cat1.jpg
+          wget $FOLDER/cat2.jpg
+          systemctl start httpd
+          systemctl enable httpd
+Outputs:
+  WebSiteURL:
+    Value: !Sub
+    - http://${PublicAddress}
+    - PublicAddress: !GetAtt WebServerKittens.PublicDnsName
