@@ -4,6 +4,5 @@ Description:
 
 Parameters:
   myAmiId
-Resources:
-  
+Resources
 Outputs:
