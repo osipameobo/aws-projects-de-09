@@ -1,52 +1,18 @@
 # Import Flask modules
-import boto3
-from botocore.exceptions import ClientError
 from flask import Flask, render_template, request
 from flaskext.mysql import MySQL
-import json
 
-# The code imports the following libraries and modules:
-# 1. boto3: AWS SDK for Python
-# 2. ClientError from botocore.exceptions: Exception class for handling errors in boto3
-# 3. Flask: Lightweight web framework for Python
-# 4. MySQL from flaskext.mysql: MySQL integration for Flask applications
-# 5. json: Standard library for JSON parsing and generation
-# 6. request and render_template from flask: Modules for handling HTTP requests and rendering templates in Flask
 
-# Function to get MySQL credentials from AWS Secrets Manager
-def get_secret():
-    secret_name = "esther-aws-flask-demo-credentials"
-    region_name = "us-east-1"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(service_name='secretsmanager', region_name=region_name)
-
-    try:
-        # Retrieve the secret value
-        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    except ClientError as e:
-        print(f"Error retrieving secret: {e}")
-        return None
-
-    # Parse the secret JSON
-    secret = get_secret_value_response['SecretString']
-    return json.loads(secret)
 
 # Create an object named app
 app = Flask(__name__)
 
-# Get MySQL credentials from AWS Secrets Manager
-secret = get_secret()
-if secret:
-    app.config['MYSQL_DATABASE_HOST'] = secret['host']
-    app.config['MYSQL_DATABASE_USER'] = secret['username']
-    app.config['MYSQL_DATABASE_PASSWORD'] = secret['password']
-    app.config['MYSQL_DATABASE_DB'] = secret['dbname']
-    app.config['MYSQL_DATABASE_PORT'] = secret['port']
-else:
-    raise ValueError("Unable to retrieve database credentials")
-
+# Configure mysql database
+app.config['MYSQL_DATABASE_HOST'] = 'kodal-flask-05.cbanmzptkrzf.us-east-1.rds.amazonaws.com'
+app.config['MYSQL_DATABASE_USER'] = 'admin'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'Clarusway_1'
+app.config['MYSQL_DATABASE_DB'] = 'clarusway'
+app.config['MYSQL_DATABASE_PORT'] = 3306
 mysql = MySQL()
 mysql.init_app(app)
 connection = mysql.connect()
@@ -109,7 +75,7 @@ def insert_email(name, email):
         response = f'User {name} and {email} have been added successfully'
     # if there is user with same name, then give warning
     else:
-        response = f'User {name} already exists.'
+        response = f'User {name} already exits.'
     return response
 
 # Write a function named `emails` which finds email addresses by keyword using `GET` and `POST` methods,
@@ -139,5 +105,5 @@ def add_email():
 
 # Add a statement to run the Flask application which can be reached from any host on port 80.
 if __name__ == '__main__':
-    app.run(debug=True)
+     app.run(debug=True)
 #    app.run(host='0.0.0.0', port=80)

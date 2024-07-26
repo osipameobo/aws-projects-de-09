@@ -15,7 +15,7 @@ import json
 
 # Function to get MySQL credentials from AWS Secrets Manager
 def get_secret():
-    secret_name = "esther-aws-flask-demo-credentials"
+    secret_name = "kodal-aws-flask-demo-credentials"
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
